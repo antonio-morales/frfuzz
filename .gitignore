@@ -1,0 +1,14 @@
+# Object files
+*.o
+*.obj
+*.d
+
+# Compiled binaries
+*.out
+*.a
+*.so
+
+*.mk
+
+/grconsole
+/grconsole_debug
