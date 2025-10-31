@@ -52,6 +52,7 @@ cd /home/antonio/.frfuzz/projects/binutils/2.22/default
 sudo apt-get update
 sudo apt-get install -y libmagic-dev libyara-dev libtar-dev nlohmann-json3-dev lcov afl++ colordiff wmctrl lm-sensors
 
+chmod +x configure
 ./configure
 make -j$(nproc)
 ```
