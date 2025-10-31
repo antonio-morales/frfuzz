@@ -206,7 +206,7 @@ int main(int argc, char *argv[]) {
 
     FRglobal ctx;
 
-    setenv("FRFUZZ_DEBUG_LEVEL", "1", 1);
+    //setenv("FRFUZZ_DEBUG_LEVEL", "1", 1);
 
     ctx.init();
 
