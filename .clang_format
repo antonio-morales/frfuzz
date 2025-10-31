@@ -1,0 +1,3 @@
+BreakBeforeBraces: Attach
+IndentWidth: 4
+ColumnLimit: 150
