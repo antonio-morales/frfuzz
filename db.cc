@@ -63,10 +63,10 @@ bool grDB::create(std::string path) {
 
         // We have to create the database
         if (sqlite3_open_v2(path.c_str(), &db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL) == SQLITE_OK) {
-            std::cout << "DEBUG: Database created" << std::endl;
+            debug() << "DEBUG: Database created" << std::endl;
 
         } else {
-            std::cout << "Error in grDB::create: sqlite3_open failed" << std::endl;
+            std::cerr << "Error in grDB::create: sqlite3_open failed" << std::endl;
             return false;
         }
 
@@ -76,14 +76,14 @@ bool grDB::create(std::string path) {
         fingerprint_table.insert({0x67724442}); //"grDB" as hex
 
         if (!insert("grDB", fingerprint_table)) {
-            std::cout << "Error in grDB::create: insert failed" << std::endl;
+            std::cerr << "Error in grDB::create: insert failed" << std::endl;
             return false;
         }
 
-        std::cout << "DEBUG: Fingerprint inserted" << std::endl;
+        debug() << "DEBUG: Fingerprint inserted" << std::endl;
 
     } else {
-        std::cout << "Error in grDB::create(): Database already exists" << std::endl;
+        std::cerr << "Error in grDB::create(): Database already exists" << std::endl;
         return false;
     }
 
@@ -310,7 +310,7 @@ data::TypedTable grDB::dump_table(std::string table_name, std::vector<std::strin
     sqlite3_stmt *stmt = nullptr;
     int rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
-        std::cerr << "dump_table: prepare failed: " << sqlite3_errmsg(db) << "\n";
+        debug() << "dump_table: prepare failed: " << sqlite3_errmsg(db) << "\n";
         return {};
     }
 

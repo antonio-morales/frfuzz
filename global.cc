@@ -86,7 +86,7 @@ FRglobal &FRglobal::init() {
     if (users_table.empty()) {
 
         // If not, create a new user/password and store it in the database
-        std::cout << "DEBUG: The table 'users' is empty" << std::endl;
+        debug() << "DEBUG: The table 'users' is empty" << std::endl;
         std::cout << "No users found in the database. New user/password will be created" << std::endl;
 
         std::string user = "grUser";

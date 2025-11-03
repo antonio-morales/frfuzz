@@ -459,7 +459,7 @@ coverage LLVM_COV::get_global_coverage(std::string html_report_file) {
         max = std::max(max, region_cov);
 
         if (max >= td.size()) {
-            std::cout << "Debug: Error: Malformed report table" << std::endl;
+            std::cerr << "Debug: Error: Malformed report table" << std::endl;
             break;
         }
 
