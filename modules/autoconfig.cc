@@ -181,8 +181,7 @@ bool install(FRglobal &ctx, std::string configuration) {
     if (ghapi::is_github_URL(download_link)) {
         std::cout << "➜ Downloading project from " << download_link << " ..." << std::endl;
     } else {
-        std::cerr << "Error: Invalid download link in download.link file" << std::endl;
-        // exit(EXIT_FAILURE);
+        debug() << "Debug: Download link is not a GitHub URL" << std::endl;
     }
 
     std::vector<std::string> headers = {"Accept: application/vnd.github.v3.raw"};

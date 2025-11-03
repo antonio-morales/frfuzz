@@ -70,6 +70,9 @@ void print_help(char *argv[], std::string command = "") {
 
     if (command == "") {
 
+        std::cout << std::endl;
+        std::cout << "Usage: " << argv[0] << " <list>" << std::endl;
+        std::cout << "Usage: " << argv[0] << " <install> <campaign> ..." << std::endl;
         std::cout << "Usage: " << argv[0] << " <tree> <queue_folder> " << std::endl;
         std::cout << "Usage: " << argv[0] << " <setup> <base_folder> <rel_binary_path> <binary_args>" << std::endl;
         std::cout << "Usage: " << argv[0] << " <build> <build_system> <AFL_instrum> [options]" << std::endl;
@@ -88,10 +91,12 @@ void print_help(char *argv[], std::string command = "") {
 
     } else if (command == "setup") {
 
+        std::cout << std::endl;
         std::cout << "Usage: " << argv[0] << " <setup> <base_folder> <rel_binary_path> <binary_args>" << std::endl;
 
     } else if (command == "build") {
 
+        std::cout << std::endl;
         std::cout << "Usage: " << argv[0] << " <build> <build_system> <AFL_instrum> [options]" << std::endl;
         std::cout << "\n";
         std::cout << "\t build_system = {make | meson | cmake}" << std::endl;
@@ -104,6 +109,7 @@ void print_help(char *argv[], std::string command = "") {
 
     } else if (command == "fuzz") {
 
+        std::cout << std::endl;
         std::cout << "Usage: " << argv[0] << " <fuzz> <engine> [Options]" << std::endl;
 
         std::cout << "\n";
@@ -132,6 +138,7 @@ void print_help(char *argv[], std::string command = "") {
 
     } else if (command == "coverage") {
 
+        std::cout << std::endl;
         std::cout << "Usage: " << argv[0] << " <coverage> [options] <output_folder1> [output_folder2] ..." << std::endl;
         std::cout << "\n";
         std::cout << "Options:" << std::endl;
@@ -140,14 +147,17 @@ void print_help(char *argv[], std::string command = "") {
 
     } else if (command == "kill") {
 
+        std::cout << std::endl;
         std::cout << "Usage: " << argv[0] << " <kill>" << std::endl;
 
     } else if (command == "gather") {
 
+        std::cout << std::endl;
         std::cout << "Usage: " << argv[0] << " <gather> [input_folder1] [input_folder2] ..." << std::endl;
 
     } else if (command == "triage") {
 
+        std::cout << std::endl;
         std::cout << "Usage: " << argv[0] << " <triage> [options] <crashes_folder1> [crashes_folder2] ..." << std::endl;
         std::cout << "\n";
         std::cout << "Options:" << std::endl;
@@ -159,6 +169,7 @@ void print_help(char *argv[], std::string command = "") {
 
     } else if (command == "copy") {
 
+        std::cout << std::endl;
         std::cout << "Usage: " << argv[0] << " <copy> <input_folder> <output_folder> [options]" << std::endl;
         std::cout << "\n";
         std::cout << "Options:" << std::endl;
@@ -169,6 +180,7 @@ void print_help(char *argv[], std::string command = "") {
 
     } else if (command == "patterns") {
 
+        std::cout << std::endl;
         std::cout << "\tFind patterns in the crashes." << std::endl;
         std::cout << "\n";
 
@@ -177,14 +189,21 @@ void print_help(char *argv[], std::string command = "") {
 
     } else if (command == "break") {
 
+        std::cout << std::endl;
         std::cout << "Usage: " << argv[0] << " <break> <breakpoint> [options] <crashes_folder1> [crashes_folder2] ..." << std::endl;
         std::cout << "\n";
         std::cout << "Options:" << std::endl;
         std::cout << "\t -n <num_threads>: number of threads to use. Default: 1" << std::endl;
         std::cout << "\n";
 
+    } else if (command == "install") {
+
+        std::cout << std::endl;
+        std::cout << "Usage: " << argv[0] << " <install> <campaign> ..." << std::endl;
+
     } else if (command == "plunger") {
 
+        std::cout << std::endl;
         std::cout << "Usage: " << argv[0] << " <plunger>" << std::endl;
         std::cout << "\n";
         std::cout << "Options:" << std::endl;
