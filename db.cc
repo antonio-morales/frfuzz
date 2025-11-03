@@ -43,11 +43,11 @@ grDB::ERROR grDB::open(std::string path) {
         // errcode = sqlite3_extended_errcode(db);
         // std::cout << sqlite3_errmsg(db) << std::endl;
 
-        std::cout << "Error in grDB::open: sqlite3_open failed" << std::endl;
+        debug() << "Error in grDB::open: sqlite3_open failed" << std::endl;
         return ERROR::FILE_NOT_FOUND;
 
     } else {
-        std::cout << "Error in grDB::open: sqlite3_open failed" << std::endl;
+        debug() << "Error in grDB::open: sqlite3_open failed" << std::endl;
         return ERROR::INTERNAL_ERROR;
     }
 
