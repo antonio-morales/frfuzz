@@ -49,8 +49,8 @@ cd /home/antonio/.frfuzz/projects/binutils/2.22/default
 
 ### Ubuntu 24.04:
 ```bash
-sudo apt-get update
-sudo apt-get install -y libmagic-dev libyara-dev libtar-dev nlohmann-json3-dev lcov afl++ colordiff wmctrl lm-sensors
+sudo apt update
+sudo apt install -y build-essential pkg-config libxml2-dev libssl-dev libsqlite3-dev libcurl4-openssl-dev libx11-dev libmagic-dev libyara-dev libtar-dev nlohmann-json3-dev lcov afl++ colordiff wmctrl lm-sensors
 
 ./configure
 make -j$(nproc)
