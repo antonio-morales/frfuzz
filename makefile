@@ -20,6 +20,27 @@ BUILD_TYPE     ?= Release
 CXXFLAGS ?= $(OPTFLAGS) $(BASE_CXXFLAGS) $(CXXSTD) $(PKG_CFLAGS) $(SANITIZER) $(LOCAL_INCLUDES)
 LDFLAGS  ?= $(PKG_LIBS) $(SANITIZER)
 
+# -------------------------------
+# Installation paths / helpers
+# -------------------------------
+prefix       ?= $(PREFIX)
+prefix       ?= /usr/local
+exec_prefix  ?= $(prefix)
+bindir       ?= $(exec_prefix)/bin
+datadir      ?= $(prefix)/share
+mandir       ?= $(datadir)/man
+
+# Packaging root (leave empty for normal installs; set when building packages)
+DESTDIR ?=
+
+# GNU-ish install helpers
+INSTALL         ?= install
+INSTALL_PROGRAM ?= $(INSTALL) -m 0755
+INSTALL_DATA    ?= $(INSTALL) -m 0644
+INSTALL_DIR     ?= $(INSTALL) -d
+
+# Name to install as (keep the runtime name stable)
+INSTALL_AS := grconsole
 
 # -------------------------------
 BIN_BASE := grconsole
@@ -78,7 +99,7 @@ DEPS := $(OBJS:.o=.d)
 # -------------------------------
 # Default target
 # -------------------------------
-.PHONY: all clean debug release
+.PHONY: all clean debug release install install-strip uninstall
 all: $(BIN_NAME)
 
 $(BIN_BASE) $(BIN_BASE)_debug: interface/grconsole.cc $(OBJS)
@@ -93,6 +114,28 @@ release:
 
 updater: interface/updater.cc
 	$(CXX) $(CXXFLAGS) $< -o $@ $(LDFLAGS)
+
+# -------------------------------
+# Installation
+# -------------------------------
+install: $(BIN_NAME)
+	$(INSTALL_DIR) "$(DESTDIR)$(bindir)"
+	$(INSTALL_PROGRAM) "$(BIN_NAME)" "$(DESTDIR)$(bindir)/$(INSTALL_AS)"
+	@echo "Installed $(BIN_NAME) -> $(DESTDIR)$(bindir)/$(INSTALL_AS)"
+
+install-strip: $(BIN_NAME)
+	$(INSTALL_DIR) "$(DESTDIR)$(bindir)"
+	strip "$(BIN_NAME)"
+	$(INSTALL_PROGRAM) "$(BIN_NAME)" "$(DESTDIR)$(bindir)/$(INSTALL_AS)"
+	@echo "Installed (stripped) $(BIN_NAME) -> $(DESTDIR)$(bindir)/$(INSTALL_AS)"
+
+uninstall:
+	rm -f "$(DESTDIR)$(bindir)/$(INSTALL_AS)"
+	@echo "Uninstalled $(DESTDIR)$(bindir)/$(INSTALL_AS)"
+
+# Optionally, manpages or data (add files as needed):
+#	$(INSTALL_DIR) "$(DESTDIR)$(mandir)/man1"
+#	$(INSTALL_DATA) docs/grconsole.1 "$(DESTDIR)$(mandir)/man1/grconsole.1"
 
 # -------------------------------
 # Compilation rules

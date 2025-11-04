@@ -54,6 +54,7 @@ sudo apt install -y build-essential pkg-config libxml2-dev libssl-dev libsqlite3
 
 ./configure
 make -j$(nproc)
+sudo make install
 ```
 
 ## Presentations
