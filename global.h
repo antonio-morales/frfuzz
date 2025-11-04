@@ -15,6 +15,13 @@ class Campaign;
 class FRglobal {
 
   public:
+    ~FRglobal() {
+        if (global_db) {
+            delete global_db;
+            global_db = nullptr;
+        }
+    }
+
     FRglobal &init();
 
     grDB *global_db = nullptr;

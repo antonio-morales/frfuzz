@@ -1,384 +1,323 @@
 /* SPDX-License-Identifier: AGPL-3.0-only */
 #pragma once
 
-#include <vector>
-#include <string>
 #include <cstdint>
-#include <sstream>
 #include <iostream>
+#include <sstream>
+#include <string>
 #include <variant>
+#include <vector>
 
 #include "utils/debug.h"
 
-namespace data
-{
+namespace data {
 
-    enum TYPE
-    {
-        TEXT,
-        LINK,
-        TABLE,
-        FIXEDTABLE,
-        TYPEDTABLE,
-        CODEBLOCK,
-        SCRIPT
-    };
+enum TYPE { TEXT, LINK, TABLE, FIXEDTABLE, TYPEDTABLE, CODEBLOCK, SCRIPT };
 
-    class Object
-    {
-    public:
-        virtual TYPE type() const = 0;
-    };
+class Object {
+  public:
+    virtual TYPE type() const = 0;
+};
 
-    class Text : public Object
-    {
+class Text : public Object {
 
-    private:
-        std::vector<std::pair<uint32_t, uint32_t>> prvHighlight;
+  private:
+    std::vector<std::pair<uint32_t, uint32_t>> prvHighlight;
 
-    protected:
-        std::string text;
+  protected:
+    std::string text;
 
-    public:
-        Text() {}
+  public:
+    Text() {}
 
-        Text(std::string text) { this->text = text; }
+    Text(std::string text) { this->text = text; }
 
-        ~Text() {}
+    ~Text() {}
 
-        TYPE type() const { return TYPE::TEXT; }
+    TYPE type() const { return TYPE::TEXT; }
 
-        const std::string &data() const { return text; }
+    const std::string &data() const { return text; }
 
-        void highlight(std::string subStr)
-        {
+    void highlight(std::string subStr) {
 
-            // Search in text
-            // Replace with <span class="highlight">str</span>
+        // Search in text
+        // Replace with <span class="highlight">str</span>
 
-            int index = 0;
-            while ((index = text.find(subStr, index)) != std::string::npos)
-            {
+        int index = 0;
+        while ((index = text.find(subStr, index)) != std::string::npos) {
 
-                prvHighlight.emplace_back(index, index + subStr.length());
+            prvHighlight.emplace_back(index, index + subStr.length());
 
-                index += subStr.length();
-            }
+            index += subStr.length();
         }
+    }
 
-        const std::vector<std::pair<uint32_t, uint32_t>> &highlight() const { return prvHighlight; }
-    };
+    const std::vector<std::pair<uint32_t, uint32_t>> &highlight() const { return prvHighlight; }
+};
 
-    class Script : public Object
-    {
+class Script : public Object {
 
-    private:
-    protected:
-        std::string code;
+  private:
+  protected:
+    std::string code;
 
-    public:
-        Script() {}
+  public:
+    Script() {}
 
-        Script(std::string code) { this->code = code; }
+    Script(std::string code) { this->code = code; }
 
-        ~Script() {}
+    ~Script() {}
 
-        TYPE type() const { return TYPE::SCRIPT; }
+    TYPE type() const { return TYPE::SCRIPT; }
 
-        const std::string &data() const { return code; }
-    };
+    const std::string &data() const { return code; }
+};
 
-    class CodeBlock : public Text
-    {
-    private:
-        std::string language;
+class CodeBlock : public Text {
+  private:
+    std::string language;
 
-    public:
-        CodeBlock() {}
+  public:
+    CodeBlock() {}
 
-        CodeBlock(std::string text) { this->text = text; }
+    CodeBlock(std::string text) { this->text = text; }
 
-        ~CodeBlock() {}
+    ~CodeBlock() {}
 
-        TYPE type() const { return TYPE::CODEBLOCK; }
+    TYPE type() const { return TYPE::CODEBLOCK; }
 
-        /*
-            void highlight(std::string str){
+    /*
+        void highlight(std::string str){
 
-            }
-        */
-    };
-
-    class Link : public Object
-    {
-    private:
-        std::string text;
-        std::string url;
-
-    public:
-        Link(std::string text, std::string url)
-        {
-            this->text = text;
-            this->url = url;
         }
+    */
+};
 
-        ~Link() {}
+class Link : public Object {
+  private:
+    std::string text;
+    std::string url;
 
-        TYPE type() const { return TYPE::LINK; }
-    };
+  public:
+    Link(std::string text, std::string url) {
+        this->text = text;
+        this->url = url;
+    }
 
-    class Table : public Object
-    {
-    private:
-        std::vector<std::string> prvHeader;
+    ~Link() {}
 
-        // TODO: Links? Images?
-        std::vector<std::vector<std::vector<Object *>>> rows;
+    TYPE type() const { return TYPE::LINK; }
+};
 
-        uint32_t numRows = 1;
+class Table : public Object {
+  private:
+    std::vector<std::string> prvHeader;
 
-        uint32_t currCol = 0;
+    // TODO: Links? Images?
+    std::vector<std::vector<std::vector<Object *>>> rows;
 
-    public:
-        Table();
+    uint32_t numRows = 1;
 
-        ~Table();
+    uint32_t currCol = 0;
 
-        TYPE type() const { return TYPE::TABLE; }
+  public:
+    Table();
 
-        void setHeader(const std::initializer_list<std::string> &columnName = {})
-        {
-            for (auto c : columnName)
-            {
-                prvHeader.push_back(c);
-            }
-        }
+    ~Table();
 
-        void newColumn();
+    TYPE type() const { return TYPE::TABLE; }
 
-        void newRow();
-
-        const std::vector<std::string> &header() const;
-
-        const std::vector<std::vector<std::vector<Object *>>> &data() const;
-
-        // operator << overload
-        template <typename T>
-        Table &operator<<(const T &t)
-        {
-
-            std::stringstream buffer;
-
-            buffer << t;
-
-            data::Text *text = new data::Text(buffer.str());
-
-            rows[numRows - 1][currCol].push_back(text);
-
-            return *this;
-        }
-
-        // operator << overload
-        // template <typename T>
-        Table &operator<<(const CodeBlock &cb)
-        {
-
-            data::CodeBlock *ptr = new data::CodeBlock(cb);
-
-            // data::Object *object = new data::Object(o);
-
-            rows[numRows - 1][currCol].push_back(ptr);
-
-            return *this;
-        }
-
-        std::string str();
-    };
-
-    enum class RECORD_TYPE
-    {
-        TEXT,
-        REAL,
-        INTEGER,
-        BLOB
-    };
-
-    class TypedTable : public Object
-    {
-
-    private:
-        std::vector<std::pair<std::string, RECORD_TYPE>> prvHeader;
-
-        std::vector<std::vector<std::variant<std::string, int, double>>> rows;
-
-        uint32_t numColumns = 0;
-
-        uint32_t currCol = 0;
-
-    public:
-        TypedTable(const std::initializer_list<std::pair<std::string, RECORD_TYPE>> &field = {})
-        {
-            for (auto f : field)
-            {
-                prvHeader.push_back(f);
-                numColumns++;
-            }
-        }
-
-        ~TypedTable() {}
-
-        bool empty() { return rows.size() == 0; }
-
-        void newColumn(std::pair<std::string, RECORD_TYPE> c)
-        {
+    void setHeader(const std::initializer_list<std::string> &columnName = {}) {
+        for (auto c : columnName) {
             prvHeader.push_back(c);
+        }
+    }
+
+    void newColumn();
+
+    void newRow();
+
+    const std::vector<std::string> &header() const;
+
+    const std::vector<std::vector<std::vector<Object *>>> &data() const;
+
+    // operator << overload
+    template <typename T> Table &operator<<(const T &t) {
+
+        std::stringstream buffer;
+
+        buffer << t;
+
+        data::Text *text = new data::Text(buffer.str());
+
+        rows[numRows - 1][currCol].push_back(text);
+
+        return *this;
+    }
+
+    // operator << overload
+    // template <typename T>
+    Table &operator<<(const CodeBlock &cb) {
+
+        data::CodeBlock *ptr = new data::CodeBlock(cb);
+
+        // data::Object *object = new data::Object(o);
+
+        rows[numRows - 1][currCol].push_back(ptr);
+
+        return *this;
+    }
+
+    std::string str();
+};
+
+enum class RECORD_TYPE { TEXT, REAL, INTEGER, BLOB };
+
+class TypedTable : public Object {
+
+  private:
+    std::vector<std::pair<std::string, RECORD_TYPE>> prvHeader;
+
+    std::vector<std::vector<std::variant<std::string, int, double>>> rows;
+
+    uint32_t numColumns = 0;
+
+    uint32_t currCol = 0;
+
+  public:
+    TypedTable(const std::initializer_list<std::pair<std::string, RECORD_TYPE>> &field = {}) {
+        for (auto f : field) {
+            prvHeader.push_back(f);
             numColumns++;
         }
+    }
 
-        TYPE type() const { return TYPE::TYPEDTABLE; }
+    ~TypedTable() {}
 
-        int getNumberColumns() { return numColumns; }
+    bool empty() { return rows.size() == 0; }
 
-        void insert(std::vector<std::variant<std::string, int, double>> row)
-        {
+    void newColumn(std::pair<std::string, RECORD_TYPE> c) {
+        prvHeader.push_back(c);
+        numColumns++;
+    }
 
-            if (row.size() != numColumns)
-            {
-                throw std::runtime_error("TypedTable::insert: row size does not match number of columns");
-            }
+    TYPE type() const { return TYPE::TYPEDTABLE; }
 
-            for (int i = 0; i < numColumns; i++)
-            {
-            }
+    int getNumberColumns() { return numColumns; }
 
-            bool error = false;
-            int c = 0;
-            for (auto &r : row)
-            {
+    void insert(std::vector<std::variant<std::string, int, double>> row) {
 
-                if (error)
-                {
-                    break;
-                }
-
-                std::visit(
-                    [this, &c, &error](auto &&arg)
-                    {
-                        using T = std::decay_t<decltype(arg)>;
-
-                        if constexpr (std::is_same_v<T, std::string>)
-                        {
-                            if (prvHeader[c].second != RECORD_TYPE::TEXT && prvHeader[c].second != RECORD_TYPE::BLOB)
-                            {
-                                // throw std::runtime_error("TypedTable::insert: type mismatch");
-                                std::cout << "TypedTable::insert: type mismatch: TEXTO " << arg << '\n';
-                                error = true;
-                                return;
-                            }
-                            debug() << "Debug : String arg: " << arg << '\n';
-                        }
-                        else if constexpr (std::is_same_v<T, int>)
-                        {
-                            if (prvHeader[c].second != RECORD_TYPE::INTEGER)
-                            {
-                                // throw std::runtime_error("TypedTable::insert: type mismatch");
-                                std::cout << "TypedTable::insert: type mismatch: INTEGER " << arg << '\n';
-                                error = true;
-                                return;
-                            }
-                            debug() << "Debug : Int arg: " << arg << '\n';
-                        }
-                        else if constexpr (std::is_same_v<T, double>)
-                        {
-                            if (prvHeader[c].second != RECORD_TYPE::REAL)
-                            {
-                                // throw std::runtime_error("TypedTable::insert: type mismatch");
-                                debug() << "TypedTable::insert: type mismatch: REAL " << arg << '\n';
-                                error = true;
-                                return;
-                            }
-                            debug() << "Debug : Double arg: " << arg << '\n';
-                        }
-                    },
-                    r);
-
-                c++;
-            }
-
-            if (!error)
-            {
-                rows.push_back(row);
-            }
+        if (row.size() != numColumns) {
+            throw std::runtime_error("TypedTable::insert: row size does not match number of columns");
         }
 
-        void insert_fromString(std::vector<std::string> input_row)
-        {
+        for (int i = 0; i < numColumns; i++) {
+        }
 
-            if (input_row.size() != numColumns)
-            {
-                throw std::runtime_error("TypedTable::insert_fromString: input_row size does not match the number of columns of the table");
+        bool error = false;
+        int c = 0;
+        for (auto &r : row) {
+
+            if (error) {
+                break;
             }
 
-            std::vector<std::variant<std::string, int, double>> row;
+            std::visit(
+                [this, &c, &error](auto &&arg) {
+                    using T = std::decay_t<decltype(arg)>;
 
-            for (int i = 0; i < numColumns; i++)
-            {
+                    if constexpr (std::is_same_v<T, std::string>) {
+                        if (prvHeader[c].second != RECORD_TYPE::TEXT && prvHeader[c].second != RECORD_TYPE::BLOB) {
+                            // throw std::runtime_error("TypedTable::insert: type mismatch");
+                            std::cout << "TypedTable::insert: type mismatch: TEXTO " << arg << '\n';
+                            error = true;
+                            return;
+                        }
+                        debug() << "Debug : String arg: " << arg << '\n';
+                    } else if constexpr (std::is_same_v<T, int>) {
+                        if (prvHeader[c].second != RECORD_TYPE::INTEGER) {
+                            // throw std::runtime_error("TypedTable::insert: type mismatch");
+                            std::cout << "TypedTable::insert: type mismatch: INTEGER " << arg << '\n';
+                            error = true;
+                            return;
+                        }
+                        debug() << "Debug : Int arg: " << arg << '\n';
+                    } else if constexpr (std::is_same_v<T, double>) {
+                        if (prvHeader[c].second != RECORD_TYPE::REAL) {
+                            // throw std::runtime_error("TypedTable::insert: type mismatch");
+                            debug() << "TypedTable::insert: type mismatch: REAL " << arg << '\n';
+                            error = true;
+                            return;
+                        }
+                        debug() << "Debug : Double arg: " << arg << '\n';
+                    }
+                },
+                r);
 
-                if (prvHeader[i].second == data::RECORD_TYPE::TEXT || prvHeader[i].second == data::RECORD_TYPE::BLOB)
-                {
-                    row.push_back(input_row[i]);
-                }
-                else if (prvHeader[i].second == data::RECORD_TYPE::INTEGER)
-                {
-                    row.push_back(std::stoi(input_row[i]));
-                }
-                else if (prvHeader[i].second == data::RECORD_TYPE::REAL)
-                {
-                    row.push_back(std::stod(input_row[i]));
-                }
-            }
+            c++;
+        }
 
+        if (!error) {
             rows.push_back(row);
         }
+    }
 
-        const std::vector<std::pair<std::string, RECORD_TYPE>> &header() const { return prvHeader; }
+    void insert_fromString(std::vector<std::string> input_row) {
 
-        const std::vector<std::vector<std::variant<std::string, int, double>>> &data() const { return rows; }
-
-        // operator << overload
-        template <typename T>
-        TypedTable &operator<<(const T &t)
-        {
-
-            if (rows.size() == 0)
-            {
-
-                // Add first row
-                rows.push_back({});
-
-                // Fixed size
-                rows[0].resize(numColumns);
-            }
-
-            if (currCol == numColumns)
-            {
-                currCol = 0;
-
-                // Add new row
-                rows.push_back({});
-
-                rows.back().resize(numColumns);
-            }
-
-            std::stringstream buffer;
-            buffer << t;
-
-            rows[rows.size() - 1][currCol] = buffer.str();
-
-            return *this;
+        if (input_row.size() != numColumns) {
+            throw std::runtime_error("TypedTable::insert_fromString: input_row size does not match the number of columns of the table");
         }
 
-        std::string str();
-    };
+        std::vector<std::variant<std::string, int, double>> row;
+
+        for (int i = 0; i < numColumns; i++) {
+
+            if (prvHeader[i].second == data::RECORD_TYPE::TEXT || prvHeader[i].second == data::RECORD_TYPE::BLOB) {
+                row.push_back(input_row[i]);
+            } else if (prvHeader[i].second == data::RECORD_TYPE::INTEGER) {
+                row.push_back(std::stoi(input_row[i]));
+            } else if (prvHeader[i].second == data::RECORD_TYPE::REAL) {
+                row.push_back(std::stod(input_row[i]));
+            }
+        }
+
+        rows.push_back(row);
+    }
+
+    const std::vector<std::pair<std::string, RECORD_TYPE>> &header() const { return prvHeader; }
+
+    const std::vector<std::vector<std::variant<std::string, int, double>>> &data() const { return rows; }
+
+    // operator << overload
+    template <typename T> TypedTable &operator<<(const T &t) {
+
+        if (rows.size() == 0) {
+
+            // Add first row
+            rows.push_back({});
+
+            // Fixed size
+            rows[0].resize(numColumns);
+        }
+
+        if (currCol == numColumns) {
+            currCol = 0;
+
+            // Add new row
+            rows.push_back({});
+
+            rows.back().resize(numColumns);
+        }
+
+        std::stringstream buffer;
+        buffer << t;
+
+        rows[rows.size() - 1][currCol] = buffer.str();
+
+        return *this;
+    }
+
+    std::string str();
+};
 
 } // namespace data

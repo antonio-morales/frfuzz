@@ -62,17 +62,14 @@ FRglobal &FRglobal::init() {
             std::cerr << "Error creating database " << this->GLOBAL_DB_PATH << std::endl;
             exit(-1);
         }
-
     } else if (error == grDB::ERROR::WRONG_FILE_FORMAT) {
 
         std::cerr << "Not a valid GRFuzz database" << std::endl;
         exit(-1);
-
     } else if (error == grDB::ERROR::INTERNAL_ERROR) {
 
         std::cerr << "Error opening database " << this->GLOBAL_DB_PATH << std::endl;
         exit(-1);
-
     } else if (error == grDB::ERROR::OK) {
 
         debug() << "Database file found. Opening it..." << std::endl;
@@ -101,7 +98,6 @@ FRglobal &FRglobal::init() {
 
         std::cout << "User: " << user << std::endl;
         std::cout << "Password: " << password << std::endl;
-
     } else {
         debug() << "DEBUG: The table 'users' was found in the database" << std::endl;
     }
@@ -116,7 +112,6 @@ FRglobal &FRglobal::init() {
         new_secrets_table.insert({"OPENAI_API_KEY", "0"});
 
         this->global_db->insert("secrets", new_secrets_table, "name");
-
     } else {
         debug() << "DEBUG: The table 'secrets' was found in the database" << std::endl;
     }
