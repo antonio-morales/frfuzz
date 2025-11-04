@@ -112,6 +112,7 @@ bool install(FRglobal &ctx, std::string configuration) {
         exit(EXIT_FAILURE);
     }
 
+    std::cout << std::endl;
     std::cout << "➜ Downloading build.sh from " << tmp_link << std::endl;
 
     http::resp_t r = http::get(tmp_link, {}, "", false);
@@ -149,6 +150,8 @@ bool install(FRglobal &ctx, std::string configuration) {
     file_content = r.body;
 
     write_file(campaign->frfuzz_file, file_content);
+
+    campaign->read_frfuzz();
 
     // Search the file "download.link" in the folder. This is a text file that contains the download link for the project
 
@@ -224,6 +227,46 @@ bool install(FRglobal &ctx, std::string configuration) {
 
     std::string out = run(cmd);
     debug() << out << std::endl;
+    std::cout << std::endl;
+
+    // Check if the compilation was successful by searching for the binary in the .frfuzz file
+
+    std::unordered_map<std::string, bool> builds = {{"__COV", false}, {"__AFL_llvm", false}, {"__ASAN", false}};
+
+    for (const auto &build : builds) {
+        std::filesystem::path binary_path = campaign->campaign_path / build.first / campaign->binary_rel_path;
+        if (std::filesystem::exists(binary_path)) {
+            debug() << "Debug: Found compiled binary at " << binary_path << std::endl;
+            builds[build.first] = true;
+        }
+    }
+
+    if(!builds["__COV"] || !builds["__AFL_llvm"]) {
+        std::cerr << "Error: Build failed" << std::endl;
+        //Dump compilation output to a log file
+        std::filesystem::path log_file_name = "autoconfig_log_" + epoch() + ".txt";
+        std::filesystem::path log_file_path = "/tmp" / log_file_name;
+        write_file(log_file_path, out);
+        std::cerr << "Check " << log_file_path << " for details" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    std::cout << "Build summary: " << std::endl;
+
+    // Aligned status column
+    size_t max_name_len = 0;
+    for (const auto &b : builds) {
+        max_name_len = std::max(max_name_len, b.first.substr(2).size());
+    }
+
+    for (const auto &build : builds) {
+        std::string build_name = build.first.substr(2);
+        std::string status = build.second ? "OK" : "MISSING";
+
+        std::cout << " - " << std::left << std::setw(static_cast<int>(max_name_len + 1)) << (build_name + ":") << " " << status << std::endl;
+    }
+
+
 
     return true;
 }

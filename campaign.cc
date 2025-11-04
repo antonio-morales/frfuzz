@@ -96,6 +96,37 @@ bool project::load(std::filesystem::path folder_path){
 }
 */
 
+bool Campaign::read_frfuzz() {
+
+    std::string content = read_file(this->frfuzz_file);
+
+    std::istringstream f(content);
+    std::string line;
+
+    std::string campaign_name;
+    if (!std::getline(f, campaign_name)) {
+        std::cerr << "Error: Could not read campaign name from .frfuzz file" << std::endl;
+        return false;
+    }
+    this->name_ = campaign_name;
+
+    std::string bin_rel_path;
+    if (!std::getline(f, bin_rel_path)) {
+        std::cerr << "Error: Could not read binary relative path from .frfuzz file" << std::endl;
+        return false;
+    }
+    this->binary_rel_path = bin_rel_path;
+
+    std::string bin_args;
+    if (!std::getline(f, bin_args)) {
+        std::cerr << "Error: Could not read binary arguments from .frfuzz file" << std::endl;
+        return false;
+    }
+    this->binary_args = bin_args;
+
+    return true;
+}
+
 bool Campaign::load_from_disk(std::filesystem::path campaign_path) {
 
     this->campaign_path = campaign_path;
@@ -108,35 +139,7 @@ bool Campaign::load_from_disk(std::filesystem::path campaign_path) {
 
     this->project_name_ = this->campaign_path.parent_path().parent_path().filename().string();
 
-    // Open the .frfuzz file
-    std::ifstream frfuzz_istream(this->frfuzz_file);
-    if (!frfuzz_istream.is_open()) {
-        std::cerr << "Error: Could not open .frfuzz file in " << this->frfuzz_file << std::endl;
-        return false;
-    }
-
-    std::string campaign_name;
-    if (!std::getline(frfuzz_istream, campaign_name)) {
-        std::cerr << "Error: Could not read campaign name from .frfuzz file" << std::endl;
-        return false;
-    }
-    this->name_ = campaign_name;
-
-    std::string bin_rel_path;
-    if (!std::getline(frfuzz_istream, bin_rel_path)) {
-        std::cerr << "Error: Could not read binary relative path from .frfuzz file" << std::endl;
-        return false;
-    }
-    this->binary_rel_path = bin_rel_path;
-
-    std::string bin_args;
-    if (!std::getline(frfuzz_istream, bin_args)) {
-        std::cerr << "Error: Could not read binary arguments from .frfuzz file" << std::endl;
-        return false;
-    }
-    this->binary_args = bin_args;
-
-    frfuzz_istream.close();
+    read_frfuzz();
 
     return true;
 }

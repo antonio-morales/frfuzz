@@ -42,6 +42,8 @@ class Campaign {
 
     bool save_to_disk(std::filesystem::path store_path); // Save In-Memory campaign to disk
 
+    bool read_frfuzz();
+
     bool load_from_disk(std::filesystem::path campaign_path);
 
     bool import(std::string source, std::string parameters);

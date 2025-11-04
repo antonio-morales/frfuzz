@@ -54,6 +54,10 @@ std::string format_duration(uint64_t duration);
 
 std::string current_time_str();
 
+inline std::string epoch() {
+    return std::to_string(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count());
+}
+
 static inline void to_lower(std::string &c) { std::transform(c.begin(), c.end(), c.begin(), ::tolower); }
 
 static inline bool is_number(const std::string &s) { return !s.empty() && std::all_of(s.begin(), s.end(), ::isdigit); }
